@@ -1,0 +1,214 @@
+### Base Configuration
+@baseUrl = http://localhost:8000
+@expiredShortUrl = abc123
+@validShortUrl = ae048b80
+@passwordProtectedUrl = 439e8e62
+@validPassword = validPassword123
+@invalidPassword = wrongpass
+
+### 1. URL Shortening Edge Cases
+
+### Valid URL with all optional parameters
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://example1.com",
+    "expiration_timestamp": "2025-01-19 10:00:00",
+    "password": "validPassword123"
+}
+
+### Invalid URL format
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "not-a-valid-url",
+    "expiration_timestamp": "2025-01-19 10:00:00"
+}
+
+### Missing required URL field
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "expiration_timestamp": "2025-01-19 10:00:00"
+}
+
+### Expiration timestamp in the past
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://example.com",
+    "expiration_timestamp": "2023-01-19 10:00:00"
+}
+
+### Invalid timestamp format
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://example.com",
+    "expiration_timestamp": "invalid-date"
+}
+
+### Very long URL (edge case)
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://example.com/very/long/url/path/that/keeps/going/and/going/with/many/parameters?param1=value1&param2=value2&param3=value3&param4=value4&param5=value5&param6=value6&param7=value7&param8=value8&param9=value9&param10=value10",
+    "expiration_timestamp": "2025-01-19 10:00:00"
+}
+
+### Empty password
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://example.com",
+    "password": ""
+}
+
+### Special characters in password
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://example2.com",
+    "password": "!@#$%^&*()"
+}
+
+### 2. URL Redirection Edge Cases
+
+### Access valid URL without password
+GET {{baseUrl}}/{{validShortUrl}}/
+
+### Access password-protected URL without password
+GET {{baseUrl}}/{{passwordProtectedUrl}}/
+
+### Access password-protected URL with valid password
+GET {{baseUrl}}/{{passwordProtectedUrl}}/?password={{validPassword}}
+
+### Access password-protected URL with invalid password
+GET {{baseUrl}}/{{passwordProtectedUrl}}/?password={{invalidPassword}}
+
+### Access expired URL
+GET {{baseUrl}}/{{expiredShortUrl}}/
+
+### Access non-existent URL
+GET {{baseUrl}}/nonexistent123/
+
+### Access URL with invalid characters
+GET {{baseUrl}}/!@#$%^&*/
+
+### 3. Analytics Edge Cases
+
+### Get analytics for valid URL
+GET {{baseUrl}}/analytics/{{validShortUrl}}/
+
+### Get analytics for password-protected URL without password
+GET {{baseUrl}}/analytics/{{passwordProtectedUrl}}/
+
+### Get analytics for password-protected URL with valid password
+GET {{baseUrl}}/analytics/{{passwordProtectedUrl}}/?password={{validPassword}}
+
+### Get analytics for password-protected URL with invalid password
+GET {{baseUrl}}/analytics/{{passwordProtectedUrl}}/?password={{invalidPassword}}
+
+### Get analytics for expired URL
+GET {{baseUrl}}/analytics/{{expiredShortUrl}}/
+
+### Get analytics for non-existent URL
+GET {{baseUrl}}/analytics/nonexistent123/
+
+### Get analytics with invalid characters in URL
+GET {{baseUrl}}/analytics/!@#$%^&*/
+
+### 4. Rate Limiting Tests
+
+### Rapid requests to shorten URL (should hit rate limit)
+# Run this section multiple times quickly
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://example.com"
+}
+
+### Rapid requests to access URL (should hit rate limit)
+# Run this section multiple times quickly
+GET {{baseUrl}}/{{validShortUrl}}/
+
+### Rapid requests to analytics (should hit rate limit)
+# Run this section multiple times quickly
+GET {{baseUrl}}/analytics/{{validShortUrl}}/
+
+### 5. Malformed Request Tests
+
+### Invalid Content-Type
+POST {{baseUrl}}/shorten/
+Content-Type: text/plain
+
+{
+    "url": "https://example.com"
+}
+
+### Malformed JSON
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://example.com",
+    invalid json format
+}
+
+### Empty request body
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+### Extra unknown fields
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://example.com",
+    "unknown_field": "value",
+    "another_field": 123
+}
+
+### Unicode URLs
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://例子.com/パス"
+}
+
+### 6. Security Edge Cases
+
+### SQL Injection attempt in URL
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://example.com'; DROP TABLE urls; --"
+}
+
+### XSS attempt in URL
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://example.com/<script>alert('xss')</script>"
+}
+
+### Very long password
+POST {{baseUrl}}/shorten/
+Content-Type: application/json
+
+{
+    "url": "https://example.com",
+    "password": "ThisIsAVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongPassword"
+}
