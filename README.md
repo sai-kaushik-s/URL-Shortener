@@ -6,11 +6,15 @@ A Python-based URL shortener system that creates shortened URLs with expiration 
 
 ## Installation
 
+1. Clone the project directory:
+   ```sh
+   git clone git@github.com:sai-kaushik-s/URL-Shortener.git
+   ```
 1. Navigate to the project directory:
    ```sh
-   cd ShortenURL
+   cd URL-Shortener
    ```
-2. Install the required dependencies:
+1. Install the required dependencies:
    ```sh
    pip install -r requirements.txt
    ```
