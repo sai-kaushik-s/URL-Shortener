@@ -8,7 +8,7 @@ A Python-based URL shortener system that creates shortened URLs with expiration 
 
 1. Clone the project directory:
    ```sh
-   git clone git@github.com:sai-kaushik-s/URL-Shortener.git
+   git clone https://github.com/sai-kaushik-s/URL-Shortener.git
    ```
 1. Navigate to the project directory:
    ```sh
